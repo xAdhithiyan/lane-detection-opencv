@@ -68,7 +68,9 @@ def average_slope_intercept(lane_img,lines):
     return np.array([left_line,right_line])
 
 img =cv2.imread(r"lane-detection/test_image.jpg")
-lane_img=np.copy(img) 
+
+
+''''lane_img=np.copy(img) 
 canny_image=canny_(img)
 masked_image=region_of_intrest(canny_image)
 
@@ -88,3 +90,32 @@ line_image=display_lines(lane_img,averaged_lines)
 final_image=cv2.addWeighted(lane_img,0.8,line_image,1 ,1)
 cv2.imshow("img",final_image)
 cv2.waitKey(0)
+'''
+
+
+#adding vid
+cap = cv2.VideoCapture("lane-detection/test2.mp4")
+while(cap.isOpened()):
+    reg_,frame = cap.read()
+    canny_image=canny_(img)
+    masked_image=region_of_intrest(canny_image)
+
+    #hough space->a line(in cartessian plane) is plotted as a point(in hough space) with coordinates (y intercept,slope)
+    #hough space->a point(in cartessian plane) can be represented by a line(in hough space)
+    #hough space->multiple points(in cartessian plane) are plotted by different lines(in hough space).the intersection point(in hough space) gives the the line that passes through the multiple points(in cartessian plane )
+    #since slope of vertical lines is infinite it cannt be  ploted on the hough space. therefore we use polar coordinates(eqn of line->xcos(theta)+ysin(theta))
+    #for polar coordinates the first 3 points are same expect the points are represented as curves in hough space
+
+    #cv2.HoughLinesP(image, rho, theta, threshold[,lines[,minLineLength[,maxLineGap]]]) \
+    #HoughLinesP contain all the possible lines with threshold above 100
+    lines=cv2.HoughLinesP(masked_image,2,np.pi/180 ,100,np.array([]), minLineLength=40,maxLineGap=5) 
+    averaged_lines=average_slope_intercept(frame,lines)
+    #we are passing averaged_lines
+    line_image=display_lines(frame,averaged_lines)
+    #adding both the images with line_image 20% more weight 
+    final_image=cv2.addWeighted(frame,0.8,line_image,1 ,1)
+    cv2.imshow("img",final_image)
+    if cv2.waitKey(1) == ord('q'):
+        break;
+cap.release()
+cv2.destroyAllWindows() 
