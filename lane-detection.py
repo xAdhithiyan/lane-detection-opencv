@@ -41,7 +41,10 @@ def display_lines(image,lines):
 
 #returns coordintaes by taking in (slope and y intercept) as parameters
 def make_coordinates(image,line_parameters):
-    slope,intercept=line_parameters
+    try:
+        slope,intercept=line_parameters
+    except TypeError:
+        slope,intercept = 0.001 , 0
     y1 = image.shape[0]
     y2 = int(y1*(3/5)) #we want this detection to be applied for only 3/5 of the image from the bottom 
     x1 =int((y1 - intercept)/slope) #from eqn of line y = mx + c
@@ -94,10 +97,10 @@ cv2.waitKey(0)
 
 
 #adding vid
-cap = cv2.VideoCapture("lane-detection/test2.mp4")
+cap = cv2.VideoCapture("lane-detection-opencv/test2.mp4")
 while(cap.isOpened()):
     reg_,frame = cap.read()
-    canny_image=canny_(img)
+    canny_image=canny_(frame)
     masked_image=region_of_intrest(canny_image)
 
     #hough space->a line(in cartessian plane) is plotted as a point(in hough space) with coordinates (y intercept,slope)
